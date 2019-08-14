@@ -97,11 +97,11 @@ class UserTree {
     
 
     deepTM(user) {
-        let data = {countTM: 0, countRD: 0};
-        if(user.titles_id == 1) {
+        const data = {countTM: 0, countRD: 0};
+        if(user.titles_id === 1) {
             user.childrens.forEach( i => {
                 if (this.getUser(i) !== undefined) {
-                    let result = this.deepTM(this.getUser(i));
+                    const result = this.deepTM(this.getUser(i));
                     data.countTM += result.countTM;
                     data.countRD += result.countRD;
                 }
@@ -118,14 +118,13 @@ class UserTree {
     async calculate(user) {
         const userDB = this.getUser(user.self.id);
         let groupPoints = parseFloat(user.personal_points);
-        let accumulativePersonalPoints = parseFloat(user.accumulative_personal_points);
+        const accumulativePersonalPoints = parseFloat(user.accumulative_personal_points);
         const personalPoints = parseFloat(groupPoints);
         let countTM = 0; let countRD = 0; let stP = 0;
 
-        let cntDead = 0;
         for(let i = 0; i < user.childrens.length; i += 1) {
             // eslint-disable-next-line no-await-in-loop
-            let gpFromChildren = await this.calculate(this.getUser(user.childrens[i]));
+            const gpFromChildren = await this.calculate(this.getUser(user.childrens[i]));
             groupPoints += gpFromChildren;
 
             if(this.getUser(user.childrens[i]) !== undefined && this.getUser(user.childrens[i]).titles_id >= 9) {
@@ -133,13 +132,10 @@ class UserTree {
                 if(this.getUser(user.childrens[i]).titles_id >= 14)
                     countRD += 1;
                 stP += this.getUser(user.childrens[i]).structure_points;
-            } else if(this.getUser(user.childrens[i]) === undefined)
-                cntDead += 1;
-            else if(this.getUser(user.childrens[i]) !== undefined) {
-
+            } else if(this.getUser(user.childrens[i]) !== undefined) {
                 if(this.getUser(user.childrens[i]).group_points >= 4000) {
                     stP += this.getUser(user.childrens[i]).group_points;
-                    let data = this.deepTM(this.getUser(user.childrens[i]));
+                    const data = this.deepTM(this.getUser(user.childrens[i]));
                     countTM += data.countTM; countRD += data.countRD;
                 }   
             }
@@ -219,19 +215,19 @@ class UserTree {
         for(let i = 0; i < user.childrens.length; i += 1) {
             // eslint-disable-next-line no-await-in-loop
             if(this.getUser(user.childrens[i]) !== undefined && this.getUser(user.childrens[i]).titles_id < 9 && this.getUser(user.childrens[i]).group_points < 4000) {
-                const children = this.getUser(user.childrens[i]); let sum_block = 0;
+                const children = this.getUser(user.childrens[i]); let sumBlock = 0;
 
                 children.blocks_group_points.forEach( gp => {
-                    sum_block += gp.group_points;
+                    sumBlock += gp.group_points;
                 });
 
-                if (userDB.titles_id == 1) {
+                if (userDB.titles_id === 1) {
                     children.blocks_group_points.forEach(gp => userDB.blocks_group_points.push(gp));
                     if(children.titles_id === 1) {
                         children.active_group_points.forEach(gp => userDB.active_group_points.push(gp));
                     } else {
                         userDB.active_group_points.push({
-                            group_points: children.group_points - sum_block,
+                            group_points: children.group_points - sumBlock,
                             titles_id: children.titles_id,
                             user_id: children.self.id,
                         });
@@ -249,19 +245,15 @@ class UserTree {
 
 
                     if(userDB.titles_id > children.titles_id) {
-                        let real_sum_block = 0;
+                        let realSumBlock = 0;
                         children.blocks_group_points.forEach( gp => {
                             if (gp.titles_id >= userDB.titles_id) {
-                                real_sum_block += gp.group_points;
+                                realSumBlock += gp.group_points;
                                 userDB.blocks_group_points.push(gp);
                             }
                         });
 
-                        if(children.titles_id == 1) {
-                           
-                            if(userDB.self.id === 15176) {
-                                console.log(children);
-                            }
+                        if(children.titles_id === 1) {
                             children.blocks_group_points.forEach( gp => {
                                 if (gp.titles_id >= userDB.titles_id) 
                                     userDB.blocks_group_points.push(gp);
@@ -278,22 +270,22 @@ class UserTree {
                         } else {
                             userDB.active_group_points.push({
                                 titles_id: children.titles_id,
-                                group_points: (children.group_points - real_sum_block > 0) ? children.group_points - real_sum_block : 0,
+                                group_points: (children.group_points - realSumBlock > 0) ? children.group_points - realSumBlock : 0,
                                 user_id: children.self.id,
                             });
                         }
                     } else {
-                        let real_sum_block = 0;
+                        let realSumBlock = 0;
                         children.blocks_group_points.forEach( gp => {
                             if (gp.titles_id >= userDB.titles_id) {
-                                real_sum_block += gp.group_points;
+                                realSumBlock += gp.group_points;
                                 userDB.blocks_group_points.push(gp);
                             }
                         });
 
                         userDB.blocks_group_points.push({
                             titles_id: children.titles_id,
-                            group_points: (children.group_points - real_sum_block > 0) ? children.group_points - real_sum_block : 0,
+                            group_points: (children.group_points - realSumBlock > 0) ? children.group_points - realSumBlock : 0,
                             user_id: children.self.id,
                         });
                     }
@@ -308,7 +300,6 @@ class UserTree {
             const ut = (userDB.titles_id >= 9) ? 7 : userDB.titles_id-2;
 
             userDB.personal_bonus = (personalPoints / 100) * this.baseBonus[ut].step_percent;
-            let secondLevel = []; let thirdLevel = [];
 
             userDB.level_bonus =  (this.getPointByLevel(userDB, 1) * this.baseBonus[ut].first_level_percent) / 100;
             userDB.level_bonus += (this.getPointByLevel(userDB, 2) * this.baseBonus[ut].second_level_percent) / 100;
