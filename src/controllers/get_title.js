@@ -1,13 +1,15 @@
 const pg = require("../database/pg");
 const yearMonth = require('../lib/year_month');
 const UserTree = require('../lib/user_tree');
+const pgKnex = require('../database/pg_knex');
+
 
 async function concatData (usersRows, pointsRows, bB, dB, lB, pg, yearMonth) {
   const pointsByUserId = [];
-  for(let i = 0; i < pointsRows.rows.length; i+=1) {
-    pointsByUserId[pointsRows.rows[i].users_id] = pointsRows.rows[i];
+  for(let i = 0; i < pointsRows.length; i+=1) {
+    pointsByUserId[pointsRows[i].users_id] = pointsRows[i];
   }
-  const Tree = new UserTree(usersRows.rows, pointsByUserId, {baseBonus:bB, directorBonus:dB, levelBonus:lB}, pg, yearMonth);
+  const Tree = new UserTree(usersRows, pointsByUserId, {baseBonus:bB, directorBonus:dB, levelBonus:lB}, pg, yearMonth);
   await Tree.init();
   return Tree;
 }
@@ -21,22 +23,21 @@ module.exports = async ctx => {
 
     ctx.status = 200;
 
-    const usersRows = await pg.query(`SELECT 
-    users.id, users.qualification, users.max_titles, users.parent_id,
-    users.last_titles, users.last_titles_year_month, users.roles_id, is_active
-    FROM users WHERE users.roles_id = 2 OR users.roles_id = 1`);
+    const usersRows = await pgKnex.table('users').select([
+      'id', 'qualification', 'max_titles', 'parent_id',
+      'last_titles', 'last_titles_year_month', 'roles_id', 'is_active'
+    ]).where('roles_id', '=', 2).orWhere('roles_id', '=', 1);
 
-    const pointsRows = await pg.query('SELECT users_id, personal_points, accumulative_personal_points FROM users_points WHERE year_month = $1', [yearMonth.now()-1]);
+    const pointsRows = await pgKnex.table('users_points').select(['users_id', 'personal_points', 'accumulative_personal_points']).where('year_month', '=', 201908);
+    const baseBonus = await pgKnex.table('marketing_plan_base_bonus').select('*');
+    const directorBonus = await pgKnex.table('marketing_plan_director_bonus').select('*');
+    const levelBonus = await pgKnex.table('marketing_plan_director_level_bonus').select('*');
 
-    const baseBonus = await pg.query('SELECT * FROM marketing_plan_base_bonus');
-    const directorBonus = await pg.query('SELECT * FROM marketing_plan_director_bonus');
-    const levelBonus = await pg.query('SELECT * FROM marketing_plan_director_level_bonus');
-
-    const result = await concatData(usersRows, pointsRows, baseBonus.rows, directorBonus.rows, levelBonus.rows, pg, yearMonth);
+    const result = await concatData(usersRows, pointsRows, baseBonus, directorBonus, levelBonus, pg, yearMonth);
 
     //20174
     ctx.body = { //18295
-        users: result.getUser(46066),
+        users: result.getUser(7),
         state: 'success',
         len: 0
     };

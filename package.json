@@ -8,7 +8,7 @@
   "scripts": {
     "start": "rimraf ./dist && babel -d ./dist ./src -s && node ./dist/main.js",
     "dev": "nodemon dev.js -L",
-    "test": "",
+    "test": "jest",
     "lint:js": "eslint ./src",
     "lint-staged": "lint-staged"
   },
@@ -19,8 +19,13 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.18.0",
     "husky": "^3.0.0",
+    "jest": "^24.9.0",
     "lint-staged": "^9.2.0",
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.1",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "eslintConfig": {
     "root": true,
@@ -39,6 +44,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.0.0",
     "jsonwebtoken": "^8.5.1",
+    "knex": "^0.19.2",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-helmet": "^4.2.0",
@@ -48,6 +54,7 @@
     "lodash": "^4.17.14",
     "mongoose": "^5.6.5",
     "node-fetch": "^2.6.0",
+    "objection": "^1.6.9",
     "pg": "^7.11.0",
     "rimraf": "^2.6.3"
   },

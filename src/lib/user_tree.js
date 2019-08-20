@@ -70,6 +70,7 @@ class UserTree {
 
     async init() {
         global.console.log(`BEFORE CLEAN TREE: ${this.users.size}`);
+        global.console.log(this.users);
         await this.calculate(this.users.get(this.root)).then(() => global.console.log(`AFTER C:EAN TREE: ${this.users.size}`));
     }
 
@@ -95,7 +96,6 @@ class UserTree {
         return maxTitles;
     }
     
-
     deepTM(user) {
         const data = {countTM: 0, countRD: 0};
         if(user.titles_id === 1) {
@@ -132,15 +132,21 @@ class UserTree {
                 if(this.getUser(user.childrens[i]).titles_id >= 14)
                     countRD += 1;
                 stP += this.getUser(user.childrens[i]).structure_points;
-            } else if(this.getUser(user.childrens[i]) !== undefined) {
+            } else if(this.getUser(user.childrens[i]) !== undefined && this.getUser(user.childrens[i]).personal_points >= 70) {
                 if(this.getUser(user.childrens[i]).group_points >= 4000) {
                     stP += this.getUser(user.childrens[i]).group_points;
                     const data = this.deepTM(this.getUser(user.childrens[i]));
                     countTM += data.countTM; countRD += data.countRD;
-                }   
+                }
+            } else if(this.getUser(user.childrens[i]) !== undefined && this.getUser(user.childrens[i]).personal_points < 70) {
+                if(this.getUser(user.childrens[i]).titles_id === 1 && this.getUser(user.childrens[i]).structure_points > 1) {
+                    stP += (this.getUser(user.childrens[i]).structure_points -  this.getUser(user.childrens[i]).group_points);
+                    const data = this.deepTM(this.getUser(user.childrens[i]));
+                    countTM += data.countTM; countRD += data.countRD;
+                }
             }
-                
         }
+
         
         userDB.group_points = groupPoints-stP;
         userDB.structure_points = groupPoints;
@@ -300,7 +306,11 @@ class UserTree {
             const ut = (userDB.titles_id >= 9) ? 7 : userDB.titles_id-2;
 
             userDB.personal_bonus = (personalPoints / 100) * this.baseBonus[ut].step_percent;
-
+            if(user.self.id === 2) {
+                global.console.log(`1lvl = ${this.getPointByLevel(userDB, 1)}`);
+                global.console.log(`2lvl = ${this.getPointByLevel(userDB, 2)}`);
+                global.console.log(`3lvl = ${this.getPointByLevel(userDB, 3)}`);
+            }
             userDB.level_bonus =  (this.getPointByLevel(userDB, 1) * this.baseBonus[ut].first_level_percent) / 100;
             userDB.level_bonus += (this.getPointByLevel(userDB, 2) * this.baseBonus[ut].second_level_percent) / 100;
             userDB.level_bonus += (this.getPointByLevel(userDB, 3) * this.baseBonus[ut].third_level_percent) / 100;
@@ -337,7 +347,7 @@ class UserTree {
                     personalPoints += this.getPointByLevel(this.getUser(id), lvl-1);
             }
         });
-
+        
         return personalPoints;
     }
 

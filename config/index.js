@@ -11,5 +11,6 @@ module.exports = {
   PG_HOST: process.env.PG_HOST ? process.env.PG_HOST : "db",
   PG_DB: process.env.PG_DB ? process.env.PG_DB : "lacore_mlm",
   PG_PASSWORD: process.env.PG_PASSWORD ? process.env.PG_PASSWORD : "2355553",
-  PG_PORT: process.env.PG_PORT ? process.env.PG_PORT : "5432"
+  PG_PORT: process.env.PG_PORT ? process.env.PG_PORT : "5432",
+  APP_ENV: process.env.APP_ENV ? process.env.APP_ENV : "development"
 };
