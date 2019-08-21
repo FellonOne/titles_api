@@ -70,7 +70,7 @@ module.exports = async ctx => {
     //20174
     ctx.body = {
       //18295
-      users: result.getUser(9),
+      users: result.getUser(2),
       state: "success",
       len: 0
     };
