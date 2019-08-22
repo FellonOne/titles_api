@@ -41,18 +41,18 @@ describe("Тестирование роута: /api/v1/title", () => {
         const bonus = response.body.users;
 
         // Titiles
-        expect(bonus.titles_id).toEqual(14);
+        expect(bonus.titles_id).toEqual(8);
 
         // Personal Bonus
-        expect(bonus.personal_bonus).toBeCloseTo(46);
+        expect(bonus.personal_bonus).toBeCloseTo(1170);
         // Level Bonus
-        expect(bonus.level_bonus).toBeCloseTo(524);
+        expect(bonus.level_bonus).toBeCloseTo(0);
         // Step bonus
-        expect(bonus.step_bonus).toBeCloseTo(543);
+        expect(bonus.step_bonus).toBeCloseTo(0);
 
         // Group Points
-        expect(bonus.group_points).toBeCloseTo(1950);
+        expect(bonus.group_points).toBeCloseTo(3000);
         // Structure Points
-        expect(bonus.structure_points).toBeCloseTo(9950);
+        expect(bonus.structure_points).toBeCloseTo(3000);
     });
 });

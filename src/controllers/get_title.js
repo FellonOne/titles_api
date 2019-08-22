@@ -25,7 +25,7 @@ module.exports = async ctx => {
       method: "get-title"
     };
     await pg.connect();
-
+    const userID = ctx.params.id;
     ctx.status = 200;
 
     const usersRows = await pgKnex
@@ -67,10 +67,9 @@ module.exports = async ctx => {
       yearMonth
     );
 
-    //20174
     ctx.body = {
       //18295
-      users: result.getUser(2),
+      users: result.getUser(parseInt(userID, 10)),
       state: "success",
       len: 0
     };

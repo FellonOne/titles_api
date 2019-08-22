@@ -76,11 +76,7 @@ class UserTree {
   }
 
   async init() {
-    global.console.log(`BEFORE CLEAN TREE: ${this.users.size}`);
-    global.console.log(this.users);
-    await this.calculate(this.users.get(this.root)).then(() =>
-      global.console.log(`AFTER C:EAN TREE: ${this.users.size}`)
-    );
+    await this.calculate(this.users.get(this.root));
   }
 
   checkDirectorTitle(user, countTM, countRD, max = false) {
@@ -359,11 +355,7 @@ class UserTree {
 
       userDB.personal_bonus =
         (personalPoints / 100) * this.baseBonus[ut].step_percent;
-      if (user.self.id === 2) {
-        global.console.log(`1lvl = ${this.getPointByLevel(userDB, 1)}`);
-        global.console.log(`2lvl = ${this.getPointByLevel(userDB, 2)}`);
-        global.console.log(`3lvl = ${this.getPointByLevel(userDB, 3)}`);
-      }
+
       userDB.level_bonus =
         (this.getPointByLevel(userDB, 1) *
           this.baseBonus[ut].first_level_percent) /
