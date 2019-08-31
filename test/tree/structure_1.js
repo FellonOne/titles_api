@@ -10,6 +10,8 @@ const init = async () => {
     await pg.table('users').where({id: 46546}).update({roles_id: 1});
     const root = await pg.table('users').where('roles_id', '=', 1).select('*');
 
+    await pg.table('users_states_histories').delete();
+    await pg.table('users_points').delete();
 
     const users = await pg.table('users').whereIn('id', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
         21, 22, 23, 24, 25, 26, 27, 28, 29, 30])
@@ -17,7 +19,7 @@ const init = async () => {
 
     for(let i = 0; i < 16; i += 1) {
         const user = users[i];
-        console.log(user.id);
+
 
         await pg.table('users').where({id: user.id}).update({roles_id: 2});
         // eslint-disable no-await-in-loop
@@ -58,7 +60,6 @@ const init = async () => {
                         .first();
 
         if(points === undefined) {
-            console.log('kEK');
             let personalPoints = 100;
             let accumulativePersonalPoints = 100;
 
@@ -96,4 +97,4 @@ const init = async () => {
     
 }
 
-init();
+module.exports = init;

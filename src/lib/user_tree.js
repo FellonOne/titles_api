@@ -30,6 +30,7 @@ class UserTree {
           director_bonus: 0,
           count_tm: 0,
           count_rd: 0,
+          salary: 0,
           active_group_points: [],
           blocks_group_points: []
         });
@@ -56,6 +57,7 @@ class UserTree {
             director_bonus: 0,
             count_tm: 0,
             count_rd: 0,
+            salary: 0,
             active_group_points: [],
             blocks_group_points: []
           });
@@ -202,12 +204,15 @@ class UserTree {
 
       if (countTM > 0 || groupPoints >= 4000 || stP > 0) {
         minTitles = 9;
-        const qualification = { state: false };
+        const qualification = { state: false, prevOne: 0, prevSecond: 0 };
+        /*
         if (userDB.self.qualification) {
-          const res = await this.pg.query(
-            "SELECT * FROM marketing_plan_start_qualification WHERE users_id = $1",
-            [userDB.self.id]
-          );
+          const res = await this.pg
+            .table("marketing_plan_start_qualification")
+            .select("*")
+            .where("users_id", "=", userDB.self.id)
+            .first();
+
           if (res.rows.length > 0) {
             qualification.start = res.rows[0].year_month_start;
             qualification.titles = res.rows[0].titles_id;
@@ -217,16 +222,70 @@ class UserTree {
 
             userDB.qualification = qualification;
           }
+        }*/
+        const maxHistoryTitles = await this.pg
+          .table("users_states_histories")
+          .where("users_id", "=", userDB.self.id)
+          .max("users_titles_id")
+          .first();
+
+        const previousTitles = await this.pg
+          .table("users_states_histories")
+          .where("users_id", "=", userDB.self.id)
+          .where("year_month", ">=", this.yearMonth.previous(3));
+
+        const countMaxTitles = await this.pg
+          .table("users_states_histories")
+          .where("users_id", "=", userDB.self.id)
+          .where("users_titles_id", "=", maxHistoryTitles.max)
+          .count()
+          .first();
+        for (let i = 0; i < previousTitles.length; i += 1) {
+          if (
+            parseInt(previousTitles[i].year_month, 10) ===
+            parseInt(this.yearMonth.previous(1), 10)
+          )
+            qualification.prevOne = parseInt(
+              previousTitles[i].users_titles_id,
+              10
+            );
+
+          if (
+            parseInt(previousTitles[i].year_month, 10) ===
+            parseInt(this.yearMonth.previous(2), 10)
+          )
+            qualification.prevSecond = parseInt(
+              previousTitles[i].users_titles_id,
+              10
+            );
         }
         let titleD = this.checkDirectorTitle(userDB, countTM, countRD, false);
-        if (qualification.state) {
-          if (titleD > qualification.titles) minTitles = qualification.titles;
-          else if (qualification.end === this.yearMonth) {
-            titleD = this.checkDirectorTitle(userDB, countTM, countRD, true);
-          }
-        } else if (userDB.self.max_titles >= titleD) {
+
+        if (
+          titleD < maxHistoryTitles ||
+          (countMaxTitles.count >= 2 &&
+            titleD === parseInt(maxHistoryTitles.max, 10))
+        ) {
           titleD = this.checkDirectorTitle(userDB, countTM, countRD, true);
-        }
+        } else if (
+          (parseInt(countMaxTitles.count, 10) === 1 &&
+            titleD === parseInt(maxHistoryTitles.max, 10) &&
+            qualification.prevOne === titleD) ||
+          maxHistoryTitles.max < titleD
+        ) {
+          if (maxHistoryTitles.max < titleD && countMaxTitles.count >= 3) {
+            titleD = this.checkDirectorTitle(userDB, countTM, countRD, false);
+          } else if (
+            maxHistoryTitles.max < titleD &&
+            countMaxTitles.count < 3 &&
+            qualification.prevOne !== 0 &&
+            qualification.prevOne === parseInt(maxHistoryTitles.max, 10)
+          ) {
+            titleD = maxHistoryTitles.max;
+          } else {
+            titleD = this.checkDirectorTitle(userDB, countTM, countRD, false);
+          }
+        } else titleD = this.checkDirectorTitle(userDB, countTM, countRD, true);
 
         minTitles = titleD;
       } else {
@@ -382,6 +441,35 @@ class UserTree {
               (points.group_points * this.baseBonus[ut].step_percent) / 100;
         }
       });
+
+      if (userDB.titles_id >= 10) {
+        const salaryBonus = new Map();
+        this.levelBonus.forEach(level => {
+          if (parseInt(level.titles_id, 10) + 9 === userDB.titles_id) {
+            salaryBonus.set(
+              level.level,
+              this.salaryBonus(userDB, level.level, level.percent)
+            );
+          }
+        });
+        let directorSalaryBonus = 0;
+        salaryBonus.forEach(val => {
+          directorSalaryBonus += val;
+        });
+        userDB.director_bonus = directorSalaryBonus;
+        userDB.salary =
+          (parseFloat(userDB.personal_bonus) +
+            parseFloat(userDB.level_bonus) +
+            parseFloat(userDB.step_bonus)) *
+            4000 +
+          directorSalaryBonus;
+      } else {
+        userDB.salary =
+          (parseFloat(userDB.personal_bonus) +
+            parseFloat(userDB.level_bonus) +
+            parseFloat(userDB.step_bonus)) *
+          4000;
+      }
     }
 
     if (userDB.titles_id === 1) {
@@ -390,6 +478,33 @@ class UserTree {
     }
 
     return groupPoints;
+  }
+
+  salaryBonus(user, lvl, percent, personallyInvited = true) {
+    if (lvl === 0)
+      return personallyInvited
+        ? (user.salary * percent) / 100
+        : (user.salary * (percent / 2)) / 100;
+    let salary = 0;
+
+    user.childrens.forEach(id => {
+      if (
+        typeof this.users.get(id) !== "undefined" &&
+        this.users.get(id) !== null
+      ) {
+        if (this.getUser(id).salary < 1)
+          salary += this.salaryBonus(this.getUser(id), lvl, percent, false);
+        else
+          salary += this.salaryBonus(
+            this.getUser(id),
+            lvl - 1,
+            percent,
+            personallyInvited
+          );
+      }
+    });
+
+    return salary;
   }
 
   getPointByLevel(user, lvl) {

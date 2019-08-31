@@ -12,5 +12,12 @@ module.exports = {
   PG_DB: process.env.PG_DB ? process.env.PG_DB : "lacore_mlm",
   PG_PASSWORD: process.env.PG_PASSWORD ? process.env.PG_PASSWORD : "2355553",
   PG_PORT: process.env.PG_PORT ? process.env.PG_PORT : "5432",
-  APP_ENV: process.env.APP_ENV ? process.env.APP_ENV : "development"
+  APP_ENV: process.env.APP_ENV ? process.env.APP_ENV : "development",
+  DB_MONGO_USER: process.env.DB_MONGO_USER ? process.env.DB_MONGO_USER : "root",
+  DB_MONGO_PASSWORD: process.env.DB_MONGO_PASSWORD
+    ? process.env.DB_MONGO_PASSWORD
+    : "2355553",
+  DB_MONGO_HOST: process.env.DB_MONGO_HOST
+    ? process.env.DB_MONGO_HOST
+    : "127.0.0.1"
 };
