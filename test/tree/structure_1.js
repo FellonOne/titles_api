@@ -1,10 +1,9 @@
-const config = require('../../config');
-config.APP_ENV = 'test';
 const pg = require('../../src/database/pg_knex');
 
 const init = async () => {
-
-    await pg.table('users').update('roles_id', 100);
+    try {
+   // console.log(pg)
+    await pg.table('users').update({'roles_id': 100});
     await pg.table('users').update({parent_id: 0});
 
     await pg.table('users').where({id: 46546}).update({roles_id: 1});
@@ -94,7 +93,10 @@ const init = async () => {
             });
         }
     }
-    
+    console.log('END ENJECTION')
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 module.exports = init;

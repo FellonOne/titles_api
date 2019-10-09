@@ -1,10 +1,13 @@
 const request = require("supertest");
-const changeQual = require('./tree/change_qualification_1');
+
 const confing = require("../config");
 
 confing.APP_ENV = "test";
+
 const server = require("../src/jest_server");
+
 const structure = require('./tree/structure_1');
+const changeQual = require('./tree/change_qualification_1');
 
 afterEach(async () => {
   await server.close();

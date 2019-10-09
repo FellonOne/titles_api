@@ -6,11 +6,12 @@
   "author": "Nick <fellonbit96@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "rimraf ./dist && babel -d ./dist ./src -s && node ./dist/main.js",
+    "start": "rimraf ./dist && babel -d ./dist ./src -s && node ./dist/index.js",
     "dev": "nodemon dev.js -L",
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "lint:js": "eslint ./src",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "injection": "nodemon test_injection.js -L"
   },
   "devDependencies": {
     "babel-register": "^6.26.0",

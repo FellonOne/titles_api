@@ -1,17 +1,15 @@
 module.exports = async (ctx, next) => {
-  const accessToken = ctx.get("Access-Token");
-  const refreshToken = ctx.get("Refresh-Token");
 
-  const authData = { accessToken, refreshToken };
-
-  if (
-    authData.access_token &&
-    authData.refresh_token &&
-    authData.access_token.length > 10
-  ) {
-    ctx.state.authorization = authData;
+  if (ctx.header['access-token'] !== undefined && ctx.header['refresh-token'] !== undefined) {
+    ctx.state.access_token = ctx.header['access-token'];
+    ctx.state.refresh_token = ctx.header['refresh-token'];
+    await next();
   } else {
-    ctx.state.authorization = null;
+    ctx.body = {
+      state: 'error',
+      message: 'unauthorized',
+      need_auth: true
+    };
+    ctx.status = 200
   }
-  await next();
 };

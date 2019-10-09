@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
-const {DB_MONGO_PASSWORD, DB_MONGO_USER, DB_MONGO_HOST, APP_DEBUG} = require('../../config');
+const cf = require('../../config');
 
+mongoose.set('useCreateIndex', true);
 (async () => {
     try {
-        let url = `mongodb://${DB_MONGO_USER}:${DB_MONGO_PASSWORD}@${DB_MONGO_HOST}/refresh_tokens?userAdmin=true`;
-        if(APP_DEBUG.toLowerCase() === 'true'){
-            url = 'mongodb://127.0.0.1/refresh_tokens';
+        let connect = `mongodb://${cf.DB_MONGO_HOST}:${cf.DB_MONGO_PASSWORD}@${cf.DB_MONGO_HOST}/${cf.DB_MONGO_BASE}?userAdmin=true`;
+        if(cf.APP_DEBUG === 'true'){
+            connect = `mongodb://${cf.DB_MONGO_HOST}/${cf.DB_MONGO_BASE}`;
         }
-        
-        await mongoose.connect(url, {useNewUrlParser: true});
+
+        await mongoose.connect(connect, {useNewUrlParser: true});
     } catch (err) {
         global.console.log(err);
     }

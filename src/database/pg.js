@@ -8,11 +8,11 @@ class PostgresConnect {
 
   async connect() {
     this.pool = await new Pool({
-      host: this.config.PG_HOST,
+      host: this.config.PG_ADDRESS,
       password: this.config.PG_PASSWORD,
       port: this.config.PG_PORT,
       database: this.config.PG_DB,
-      user: this.config.PG_USER
+      user: this.config.PG_LOGIN
     })
   }
 

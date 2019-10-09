@@ -91,6 +91,8 @@ const init = async (param) => {
             qualification: 1,
             year_month: 201902
         });
+
+        console.log(`UPDATE CHANGE QUALIFICATION`);
     } 
 }
 

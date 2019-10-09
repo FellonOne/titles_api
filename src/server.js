@@ -18,7 +18,7 @@ app.use(async (ctx, next) => {
   ctx.set("Access-Control-Allow-Methods", "GET, POST");
   ctx.set("Access-Control-Allow-Credentials", true);
   ctx.set("Access-Control-Allow-Headers", [
-    'Origin', 'Content-Type', 'Accept', 'Authorization'
+    'Origin', 'Content-Type', 'Accept', 'Authorization', 'Access-token', 'Refresh-token'
   ]);
   ctx.set("X-Powered-By", "PHP 4.2.0");
   ctx.set("X-XSS-Protection", "1; mode=block; report=/report-xss-violation");
@@ -32,9 +32,16 @@ const fsStream = fs.createWriteStream(
 
 app.use(morgan('combined', {stream: fsStream}));
 app.use(middlewares.parseToken);
-// app.use(middlewares.auth);
+app.use(middlewares.auth);
 
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+app.use(async (ctx) => {
+  if (ctx.state.update && ctx.state.update.update_token === true) {
+    ctx.body.update_token = true;
+    ctx.body.body = ctx.state.update.bode;
+  }
+})
 
 module.exports = app;

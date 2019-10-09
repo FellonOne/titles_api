@@ -1,14 +1,14 @@
 const path = require("path");
-const config = require("./index");
+const config = require('./index');
 
 const BASE_PATH = path.join(__dirname, "src", "database");
 
 module.exports = {
   test: {
     client: "postgres",
-    connection: `postgres://${config.PG_USER}:${
+    connection: `postgres://${config.PG_LOGIN}:${
       config.PG_PASSWORD
-    }@localhost:5432/${config.PG_DB}_test`,
+    }@${config.PG_ADDRESS}:5432/${config.PG_DB}_test`,
     migrations: {
       directory: path.join(BASE_PATH, "migrations")
     },
@@ -19,9 +19,9 @@ module.exports = {
 
   development: {
     client: "postgres",
-    connection: `postgres://${config.PG_USER}:${
+    connection: `postgres://${config.PG_LOGIN}:${
       config.PG_PASSWORD
-    }@localhost:5432/${config.PG_DB}`,
+    }@${config.PG_ADDRESS}:5432/${config.PG_DB}`,
     migrations: {
       directory: path.join(BASE_PATH, "migrations")
     },

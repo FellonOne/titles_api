@@ -222,7 +222,8 @@ class UserTree {
 
             userDB.qualification = qualification;
           }
-        }*/
+        }ы
+        */
         const maxHistoryTitles = await this.pg
           .table("users_states_histories")
           .where("users_id", "=", userDB.self.id)
@@ -348,18 +349,7 @@ class UserTree {
               user_id: children.self.id
             });
           }
-        } else {
-          if (
-            children.titles_id === 1 &&
-            Math.abs(children.group_points - children.personal_points) < 1
-          ) {
-            userDB.active_group_points.push({
-              group_points: children.personal_points,
-              titles_id: 1,
-              user_id: children.self.id
-            });
-          }
-          if (userDB.titles_id > children.titles_id) {
+        } else if (userDB.titles_id > children.titles_id) {
             let realSumBlock = 0;
             children.blocks_group_points.forEach(gp => {
               realSumBlock += gp.group_points;
@@ -384,28 +374,26 @@ class UserTree {
                 user_id: children.self.id
               });
             }
-          } else {
-            let realSumBlock = 0;
-            children.blocks_group_points.forEach(gp => {
-              if (gp.titles_id >= userDB.titles_id) {
-                realSumBlock += gp.group_points;
-                userDB.blocks_group_points.push(gp);
-              }
-            });
+        } else {
+          let realSumBlock = 0;
+          children.blocks_group_points.forEach(gp => {
+            if (gp.titles_id >= userDB.titles_id) {
+              realSumBlock += gp.group_points;
+              userDB.blocks_group_points.push(gp);
+            }
+          });
 
-            userDB.blocks_group_points.push({
-              titles_id: children.titles_id,
-              group_points:
-                children.group_points - realSumBlock > 0
-                  ? children.group_points - realSumBlock
-                  : 0,
-              user_id: children.self.id
-            });
-          }
+          userDB.blocks_group_points.push({
+            titles_id: children.titles_id,
+            group_points:
+              children.group_points - realSumBlock > 0
+                ? children.group_points - realSumBlock
+                : 0,
+            user_id: children.self.id
+          });
         }
       }
     }
-
     /*
      *   Salary Calculation
      */

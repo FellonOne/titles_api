@@ -1,7 +1,6 @@
 const yearMonth = require("../lib/year_month");
 const UserTree = require("../lib/user_tree");
 const pgKnex = require("../database/pg_knex");
-const config = require("../../config");
 const UserState = require("../models/users_state");
 
 async function concatData(usersRows, pointsRows, bB, dB, lB) {
@@ -41,14 +40,14 @@ module.exports = async ctx => {
       ])
       .where("roles_id", "=", 2)
       .orWhere("roles_id", "=", 1);
-
+    
     const pointsRows = await pgKnex
       .table("users_points")
       .select(["users_id", "personal_points", "accumulative_personal_points"])
       .where(
         "year_month",
         "=",
-        (config.APP_ENV === "test" ? 201908 : yearMonth.now() - 1)
+        yearMonth.now()
       );
     const baseBonus = await pgKnex
       .table("marketing_plan_base_bonus")
